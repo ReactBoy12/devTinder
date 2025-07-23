@@ -2,17 +2,10 @@ const express = require("express");
 
 const app = express();
 
-// app.use((req, res) => {
-//   console.log("request check");
-//   res.send("hello from my server");
-// });
-
-app.use("/test", (req, res) => {
-  res.send("this test for server");
-});
-
-app.use("/hello", (req, res) => {
-  res.send("hello hello developers");
+app.get("/user/:userID/:name/:password", (req, res) => {
+  console.log("request parameter", req.params);
+  // onsole.log("request parameter", req.query);
+  res.send({ firstName: "Shailesh", lastName: "Gore" });
 });
 
 app.listen(7777, function () {
