@@ -74,6 +74,22 @@ const { adminAuth, userLoginAuth } = require("./middlewares/auth");
 //   res.send({ uname, password });
 // });
 
+app.get("/getUserData", (req, res) => {
+  try {
+    // throw new Error("fsghfsfd");
+    res.send("fine everything");
+  } catch (err) {
+    res.status(500).send("something went wrong please contact support team");
+  }
+});
+// app.use("/", (err, req, res, next) => {
+//   console.log("check123");
+//   if (err) {
+//     res.status(500).send("something went wrong...");
+//   } else {
+//     next();
+//   }
+// });
 app.use("/admin", adminAuth);
 // app.use("/user/data", userLoginAuth);
 app.get("/admin/viewAllAttendance", (req, res) => {
@@ -92,6 +108,7 @@ app.get("/user/data/loginData", userLoginAuth, (req, res) => {
 app.get("/admin/deleteUser", (req, res) => {
   res.send("deleted user");
 });
+
 app.listen(7777, function () {
   console.log("server is running on port 7777");
 });
