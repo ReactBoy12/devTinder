@@ -2,6 +2,7 @@ const express = require("express");
 
 const app = express();
 
+const { adminAuth, userLoginAuth } = require("./middlewares/auth");
 // app.use(
 //   "/user",
 //   [
@@ -56,21 +57,40 @@ const app = express();
 //   res.send("2nd response");
 // });
 
-app.use("/user/:uname/:password", (req, res, next) => {
-  console.log("this is first middleware....");
-  let { uname, password } = req.params;
-  console.log(req.params.uname);
-  if (uname.trim() == "" || password.trim() == "") {
-    console.log(req.params.uname);
-    res.send("something went wrong");
-  } else {
-    next();
-  }
+// app.use("/user/:uname/:password", (req, res, next) => {
+//   console.log("this is first middleware....");
+//   let { uname, password } = req.params;
+//   console.log(req.params.uname);
+//   if (uname.trim() == "" || password.trim() == "") {
+//     console.log(req.params.uname);
+//     res.send("something went wrong");
+//   } else {
+//     next();
+//   }
+// });
+// app.get("/user/:uname/:password", (req, res, next) => {
+//   let { uname, password } = req.params;
+//   console.log(uname);
+//   res.send({ uname, password });
+// });
+
+app.use("/admin", adminAuth);
+// app.use("/user/data", userLoginAuth);
+app.get("/admin/viewAllAttendance", (req, res) => {
+  res.send("viewed attendance...");
 });
-app.get("/user/:uname/:password", (req, res, next) => {
-  let { uname, password } = req.params;
-  console.log(uname);
-  res.send({ uname, password });
+
+app.post("/user/login", (req, res) => {
+  res.send("successfully registered...");
+});
+
+app.get("/user/data/loginData", userLoginAuth, (req, res) => {
+  console.log("checking the data");
+  res.send("user logged In");
+});
+
+app.get("/admin/deleteUser", (req, res) => {
+  res.send("deleted user");
 });
 app.listen(7777, function () {
   console.log("server is running on port 7777");
