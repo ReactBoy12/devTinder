@@ -1,6 +1,9 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {
+  emailAnddPassValidation,
+} = require("./middlewares/emailAndPassValidation");
 const User2Model = require("./models/user2");
 const app = express();
 app.use(express.json());
@@ -9,11 +12,14 @@ app.post("/signUp", async (req, res) => {
   try {
     let userObj = req.body;
     const newUser = new User(userObj);
+    // const modelWaiting = await newUser.init();s
+    // console.log(db.users.getIndexes());
     await newUser.save();
+
     // throw new Error("sdsd");
-    res.status(401).send("user registered successfully");
-  } catch (err) {
-    res.status(500).send("something went wrong => ", err);
+    res.status(201).send("user registered successfully");
+  } catch (error) {
+    res.status(500).send("something went wrong => ", error);
   }
 });
 
@@ -47,6 +53,51 @@ app.get("/userById", async (req, res) => {
   }
 });
 
+app.delete("/user", async (req, res) => {
+  const userId = req.body._id;
+  try {
+    const deleteOneUser = await User.findByIdAndDelete({ _id: userId });
+    console.log(deleteOneUser);
+    if (deleteOneUser === null) {
+      res.status(404).send("User does not exist to delete");
+    } else {
+      res.send("deleted successfully..");
+    }
+  } catch (err) {
+    res.status(400).send("something went wrong");
+  }
+});
+
+app.patch(
+  "/user",
+  async (req, res, next) => {
+    try {
+      const userId = req.body._id;
+      const isIdFound = await User.find({ _id: userId });
+      if (isIdFound.length !== 0) {
+        next();
+      } else {
+        res.send("Error while finding ID..please check");
+      }
+    } catch (err) {
+      res.status(400).send("something went wrong while requesting user");
+    }
+  },
+  // emailAnddPassValidation,
+  async (req, res) => {
+    const { _id, ...data } = req.body;
+    console.log(_id);
+    try {
+      // console.log(isIdFound, "data");
+      await User.findByIdAndUpdate(_id, data, { runValidators: true });
+      res.send("Data updated successfully..");
+    } catch (err) {
+      console.log(err);
+      res.status(400).send("something went wrong while updating " + err);
+    }
+  }
+);
+
 app.get("/feed", async (req, res) => {
   try {
     const allUsers = await User.find({});
@@ -64,6 +115,7 @@ app.get("/feed", async (req, res) => {
 connectDB()
   .then(() => {
     console.log("DB  connected successfully");
+
     app.listen(7777, function () {
       console.log("server is running on port 7777");
     });
