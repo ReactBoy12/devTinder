@@ -69,10 +69,11 @@ app.delete("/user", async (req, res) => {
 });
 
 app.patch(
-  "/user",
+  "/user/:id",
   async (req, res, next) => {
     try {
-      const userId = req.body._id;
+      const userId = req.params.id;
+      console.log(userId);
       const isIdFound = await User.find({ _id: userId });
       if (isIdFound.length !== 0) {
         next();
@@ -85,9 +86,31 @@ app.patch(
   },
   // emailAnddPassValidation,
   async (req, res) => {
-    const { _id, ...data } = req.body;
+    const { ...data } = req.body;
+    const _id = req.params.id;
     console.log(_id);
+
+    const ALLOWED_UPDATE = [
+      "firstName",
+      "lastName",
+      "age",
+      "password",
+      "skills",
+    ];
     try {
+      console.log(Object.keys(data), "check the data");
+
+      const isItemAllowed = Object.keys(data).every((e) => {
+        return ALLOWED_UPDATE.includes(e);
+      });
+
+      if (!isItemAllowed) {
+        throw new Error("updates are not allowed...");
+      }
+      console.log(isItemAllowed);
+      if (data.skills.length > 10) {
+        throw new Error("skills cannot be more than 10");
+      }
       // console.log(isIdFound, "data");
       await User.findByIdAndUpdate(_id, data, { runValidators: true });
       res.send("Data updated successfully..");
