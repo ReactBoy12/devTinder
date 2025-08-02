@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const validator = require("validator");
 const userSchema = new mongoose.Schema(
   {
     // _id: {
@@ -22,8 +22,13 @@ const userSchema = new mongoose.Schema(
       unique: true,
       validate(value) {
         console.log("value while schema..", value);
-        if (value.includes(" ")) {
-          throw new Error("value cannot contain the spacess check....");
+        // if (value.includes(" ")) {
+        //   throw new Error("value cannot contain the spacess check....");
+        // } else if (!value.includes("@") || !value.includes(".")) {
+        //   throw new Error("email should contain (@ ) and (.)");
+        // }
+        if (validator.isEmail(value) == false) {
+          throw new Error("email should be in format");
         }
       },
     },
@@ -32,6 +37,12 @@ const userSchema = new mongoose.Schema(
       required: true,
       minLength: 8,
       maxLength: 24,
+      trim: true,
+      validate(value) {
+        if (value.includes(" ")) {
+          throw new Error("should not contain the spaces in password");
+        }
+      },
     },
     age: {
       type: Number,

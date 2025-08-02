@@ -19,7 +19,7 @@ app.post("/signUp", async (req, res) => {
     // throw new Error("sdsd");
     res.status(201).send("user registered successfully");
   } catch (error) {
-    res.status(500).send("something went wrong => ", error);
+    res.status(500).send("something went wrong => " + error);
   }
 });
 
