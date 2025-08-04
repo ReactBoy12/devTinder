@@ -1,23 +1,60 @@
 const express = require("express");
 const connectDB = require("./config/database");
+const bcrypt = require("bcrypt");
 const User = require("./models/user");
 const {
   emailAnddPassValidation,
 } = require("./middlewares/emailAndPassValidation");
+const validateSignUpData = require("./utils/validateSignUpData");
 const User2Model = require("./models/user2");
 const app = express();
 app.use(express.json());
 
 app.post("/signUp", async (req, res) => {
+  const { firstName, lastName, emailId, password, age, gender } = req.body;
+
   try {
-    let userObj = req.body;
-    const newUser = new User(userObj);
-    // const modelWaiting = await newUser.init();s
-    // console.log(db.users.getIndexes());
+    validateSignUpData(req);
+    const passwordHash = await bcrypt.hash(password, 10);
+    const newUser = new User({
+      firstName,
+      lastName,
+      emailId,
+      password: passwordHash,
+      age,
+      gender,
+    });
+
     await newUser.save();
 
-    // throw new Error("sdsd");
     res.status(201).send("user registered successfully");
+  } catch (error) {
+    res.status(500).send("something went wrong => " + error);
+  }
+});
+
+app.post("/user/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    const isEmailValid = await User.find({ emailId: emailId });
+    console.log(isEmailValid);
+
+    if (isEmailValid == false) {
+      throw new Error("invalid credentials.....");
+    } else {
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        isEmailValid[0].password
+      );
+
+      if (isPasswordValid) {
+        res.cookie("token", "asdfghjklkjhgfdsdfghjk");
+        res.status(302).send("data found and user logged in successfully");
+      } else {
+        throw new Error("invalid credentials...try again");
+      }
+    }
   } catch (error) {
     res.status(500).send("something went wrong => " + error);
   }
