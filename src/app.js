@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
 const jwt = require("jsonwebtoken");
 const User = require("./models/user");
+const { userLoginAuth } = require("./middlewares/auth");
 const {
   emailAnddPassValidation,
 } = require("./middlewares/emailAndPassValidation");
@@ -35,23 +36,19 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userLoginAuth, async (req, res) => {
   try {
-    const { token } = req.cookies;
-    const getDataVerifiedToken = jwt.verify(token, "shai@1221");
-    const isContainData = JSON.stringify(getDataVerifiedToken) == {};
-
-    if (isContainData == false) {
-      const authorizedData = await User.findById({
-        _id: getDataVerifiedToken.data,
-      });
-      res.status(301).send(authorizedData);
-    } else {
-      throw new Error("please Login in again...");
-    }
+    const authData = req.authData;
+    res.status(302).send(authData);
   } catch (error) {
     res.status(500).send("something went wrong => " + error);
   }
+});
+
+app.post("/sendConnectionRequest", userLoginAuth, (req, res) => {
+  const authData = req.authData;
+  const { firstName, lastName } = authData;
+  res.send(`${firstName} ${lastName} sent the connection request...`);
 });
 
 app.post("/user/login", async (req, res) => {
@@ -73,9 +70,10 @@ app.post("/user/login", async (req, res) => {
         //generate the token and wrap in the cookie
         let jwtToken = await jwt.sign(
           { data: isEmailValid[0]._id },
-          "shai@1221"
+          "shai@1221",
+          { expiresIn: "0d" }
         );
-        console.log(jwtToken, "token get created");
+
         res.cookie("token", jwtToken);
         res.status(302).send("data found and user logged in successfully");
       } else {
