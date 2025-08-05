@@ -1,6 +1,8 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
 const User = require("./models/user");
 const {
   emailAnddPassValidation,
@@ -9,7 +11,7 @@ const validateSignUpData = require("./utils/validateSignUpData");
 const User2Model = require("./models/user2");
 const app = express();
 app.use(express.json());
-
+app.use(cookieParser());
 app.post("/signUp", async (req, res) => {
   const { firstName, lastName, emailId, password, age, gender } = req.body;
 
@@ -33,6 +35,25 @@ app.post("/signUp", async (req, res) => {
   }
 });
 
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    const getDataVerifiedToken = jwt.verify(token, "shai@1221");
+    const isContainData = JSON.stringify(getDataVerifiedToken) == {};
+
+    if (isContainData == false) {
+      const authorizedData = await User.findById({
+        _id: getDataVerifiedToken.data,
+      });
+      res.status(301).send(authorizedData);
+    } else {
+      throw new Error("please Login in again...");
+    }
+  } catch (error) {
+    res.status(500).send("something went wrong => " + error);
+  }
+});
+
 app.post("/user/login", async (req, res) => {
   try {
     const { emailId, password } = req.body;
@@ -49,7 +70,13 @@ app.post("/user/login", async (req, res) => {
       );
 
       if (isPasswordValid) {
-        res.cookie("token", "asdfghjklkjhgfdsdfghjk");
+        //generate the token and wrap in the cookie
+        let jwtToken = await jwt.sign(
+          { data: isEmailValid[0]._id },
+          "shai@1221"
+        );
+        console.log(jwtToken, "token get created");
+        res.cookie("token", jwtToken);
         res.status(302).send("data found and user logged in successfully");
       } else {
         throw new Error("invalid credentials...try again");
