@@ -56,23 +56,13 @@ app.post("/user/login", async (req, res) => {
     const { emailId, password } = req.body;
 
     const isEmailValid = await User.find({ emailId: emailId });
-    console.log(isEmailValid);
 
     if (isEmailValid == false) {
       throw new Error("invalid credentials.....");
     } else {
-      const isPasswordValid = await bcrypt.compare(
-        password,
-        isEmailValid[0].password
-      );
-
+      const isPasswordValid = isEmailValid[0].getBcryptPassword(password);
       if (isPasswordValid) {
-        //generate the token and wrap in the cookie
-        let jwtToken = await jwt.sign(
-          { data: isEmailValid[0]._id },
-          "shai@1221",
-          { expiresIn: "0d" }
-        );
+        let jwtToken = await isEmailValid[0].getJWT();
 
         res.cookie("token", jwtToken);
         res.status(302).send("data found and user logged in successfully");
