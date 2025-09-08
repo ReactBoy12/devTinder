@@ -1,20 +1,25 @@
 const mongoose = require("mongoose");
 
-const connectionRequestSchema = new mongoose.Schema({
-  fromRequestID: {
-    type: mongoose.Schema.Types.ObjectId,
-  },
-  toRequestID: {
-    type: mongoose.Schema.Types.ObjectId,
-  },
-  status: {
-    type: String,
-    enum: {
-      values: ["interested", "ignored", "accepted", "rejected"],
-      message: `{VALUE} is not valid status`,
+const connectionRequestSchema = new mongoose.Schema(
+  {
+    fromRequestID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    toRequestID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+    status: {
+      type: String,
+      enum: {
+        values: ["interested", "ignored", "accepted", "rejected"],
+        message: `{VALUE} is not valid status`,
+      },
     },
   },
-});
+  { timestamps: true }
+);
 
 connectionRequestSchema.pre("save", function (next) {
   console.log(this, "checking");

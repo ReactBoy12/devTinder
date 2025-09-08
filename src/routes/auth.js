@@ -9,7 +9,7 @@ authRouter.post("/signUp", async (req, res) => {
   const { firstName, lastName, emailId, password, age, gender } = req.body;
 
   try {
-    validateSignUpData(req);
+    // validateSignUpData(req);
     const passwordHash = await bcrypt.hash(password, 10);
     const newUser = new User({
       firstName,
@@ -24,7 +24,7 @@ authRouter.post("/signUp", async (req, res) => {
 
     res.status(201).send("user registered successfully");
   } catch (error) {
-    res.status(500).send("something went wrong => " + error);
+    res.status(500).send("something went wrong 2=> " + error);
   }
 });
 
@@ -42,7 +42,12 @@ authRouter.post("/login", async (req, res) => {
         let jwtToken = await isEmailValid[0].getJWT();
 
         res.cookie("token", jwtToken);
-        res.status(302).send("data found and user logged in successfully");
+        res
+          .status(200)
+          .json({
+            message: "data found and user logged in successfully ",
+            data: isEmailValid,
+          });
       } else {
         throw new Error("invalid credentials...try again");
       }
