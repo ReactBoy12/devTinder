@@ -36,24 +36,22 @@ authRouter.post("/login", async (req, res) => {
 
     if (isEmailValid == false) {
       throw new Error("invalid credentials.....");
-    } else {
-      const isPasswordValid = isEmailValid[0].getBcryptPassword(password);
-      if (isPasswordValid) {
-        let jwtToken = await isEmailValid[0].getJWT();
+    }
+    const isPasswordValid = await isEmailValid[0].getBcryptPassword(password);
+    console.log(isPasswordValid, "check1");
+    if (isPasswordValid) {
+      console.log(isPasswordValid);
+      let jwtToken = await isEmailValid[0].getJWT();
 
-        res.cookie("token", jwtToken);
-        res
-          .status(200)
-          .json({
-            message: "data found and user logged in successfully ",
-            data: isEmailValid,
-          });
-      } else {
-        throw new Error("invalid credentials...try again");
-      }
+      res.cookie("token", jwtToken);
+      res.status(200).json({
+        userData: isEmailValid,
+      });
+    } else {
+      throw new Error("invalid credentials...try again");
     }
   } catch (error) {
-    res.status(500).send("something went wrong => " + error);
+    res.status(500).send(error.message);
   }
 });
 

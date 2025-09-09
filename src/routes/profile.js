@@ -6,7 +6,7 @@ const profileRouter = express.Router();
 profileRouter.get("/profile", userLoginAuth, async (req, res) => {
   try {
     const authData = req.authData;
-    res.status(302).send(authData);
+    res.status(200).send(authData);
   } catch (error) {
     res.status(500).send("something went wrong => " + error);
   }
