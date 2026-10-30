@@ -1,0 +1,13 @@
+const express = require("express");
+const app = express();
+app.use("/", (req, res) => {
+  res.send("Home");
+});
+
+app.use("/dashboard", (req, res) => {
+  res.send("Dashboard");
+});
+
+app.listen(3000, () => {
+  console.log("Server is running on port 3000");
+});
