@@ -1,33 +1,32 @@
 const express = require("express");
+
+const adminAuth = require("./middlewares/adminAuth");
 const app = express();
 
-app.get("/user", (req, res) => {
-  res.send({ firstname: "John", lastname: "Doe" });
+// app.use("/admin", adminAuth.adminAuth);
+// // app.use("/admin");
+// app.get("/admin/getUserData", adminAuth.userAuth, (req, res, next) => {
+//   res.send("User data retrieved successfully");
+// });
+
+// app.get("/admin/deleteUserData", (req, res, next) => {
+//   res.send("User data deleted successfully");
+// });
+app.get("/getUserData", (req, res, next) => {
+  try {
+    // Simulating an error
+    // throw new Error("Something went wrong while retrieving user data");
+    res.status(200).send("User data retrieved successfully"); 
+  } catch (err) {
+    res.status(500).send("Internal server error in get");
+  }
+ 
 });
 
-app.post("/user", (req, res) => {
-  //do operation for saving the data to the database
-  res.send("User data saved successfully");
-});
-
-app.delete("/user", (req, res) => {
-  //do operation for deleting the data from the database
-  res.send("User data deleted successfully");
-});
-
-app.put("/user", (req, res) => {
-  //do operation for updating the data in the database
-  res.send("User data updated successfully");
-});
-
-app.patch("/user", (req, res) => {
-  //do operation for partially updating the data in the database
-  res.send("User data partially updated successfully");
-});
-
-app.use("/", (req, res) => {
-  res.send("Home");
-});
+// app.use("/", (err, req, res, next) => {
+//   console.log(err, "111");
+//   res.status(500).send("Internal Server Error");
+// });
 
 app.listen(5000, () => {
   console.log("Server is running on port 5000");
