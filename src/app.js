@@ -1,33 +1,65 @@
 const express = require("express");
-
+const connectDB = require("./config/database");
 const adminAuth = require("./middlewares/adminAuth");
+const User = require("./models/user");
 const app = express();
+app.use(express.json());
 
-// app.use("/admin", adminAuth.adminAuth);
-// // app.use("/admin");
-// app.get("/admin/getUserData", adminAuth.userAuth, (req, res, next) => {
-//   res.send("User data retrieved successfully");
-// });
-
-// app.get("/admin/deleteUserData", (req, res, next) => {
-//   res.send("User data deleted successfully");
-// });
-app.get("/getUserData", (req, res, next) => {
+app.post("/signUp", async (req, res) => {
   try {
-    // Simulating an error
-    // throw new Error("Something went wrong while retrieving user data");
-    res.status(200).send("User data retrieved successfully"); 
-  } catch (err) {
-    res.status(500).send("Internal server error in get");
+    const requestBody = req.body;
+    console.log("Request Body:", requestBody);
+    const userData = new User(requestBody);
+
+    await userData.save();
+    res.status(201).send("User created successfully");
+  } catch (error) {
+    // console.error(error);
+    res.status(500).send("Internal Server Error", error);
   }
- 
 });
 
-// app.use("/", (err, req, res, next) => {
-//   console.log(err, "111");
-//   res.status(500).send("Internal Server Error");
-// });
-
-app.listen(5000, () => {
-  console.log("Server is running on port 5000");
+app.put("/UpdateUser", async (req, res) => {
+  const { lastName, emailId } = req.body;
+  const userData = new User(req.body);
+  await User.findOne({ lastName: lastName }).updateOne({ emailId: emailId });
+  await userData.save();
+  res.status(200).send("User updated successfully");
 });
+
+app.get("/getUser", async (req, res) => {
+  const emailId = req.body.emailId;
+  try {
+    const user = await User.find({ emailId: emailId });
+    res.status(200).send(`User Found - ${user}`);
+  } catch (error) {
+    res.status(500).send("User Not Found...", error);
+  }
+});
+
+app.delete("/deleteUser", async (req, res) => {
+  const userId = req.body.userId;
+  await User.findByIdAndDelete(userId);
+  res.status(200).send("User deleted successfully");
+});
+
+app.get("/feed", async (req, res) => {
+  try {
+    const users = await User.find({});
+    res.send(users);
+  } catch (error) {
+    res.status(500).send("somethins went wrong", error);
+  }
+});
+
+connectDB()
+  .then(() => {
+    console.log("Database connected");
+    app.listen(5000, () => {
+      console.log("Server is running on port 5000");
+    });
+  })
+  .catch((err) => {
+    console.log("Database connection failed", err);
+  });
+
