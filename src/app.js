@@ -51,7 +51,32 @@ app.get("/feed", async (req, res) => {
     res.status(500).send("somethins went wrong", error);
   }
 });
+const ALLOWEDUPDATES = ["about", "gender", "languages", "skills"];
 
+app.patch("/updateUser/:_id", async (req, res) => {
+  const { ...updateData } = req.body;
+  const userId = req.params._id;
+  const isUpdateAllowed = Object.keys(updateData).every((val) => {
+    return ALLOWEDUPDATES.includes(val);
+  });
+  // console.log(_id);
+  console.log(isUpdateAllowed);
+  try {
+    if (!isUpdateAllowed || updateData.languages.length > 10) {
+      return res.status(400).send("Invalid updates");
+    }
+    await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      {
+        runValidators: true,
+      }
+    );
+    res.status(200).send("User updated successfully");
+  } catch (error) {
+    res.status(500).send("Something went wrong" + error);
+  }
+});
 connectDB()
   .then(() => {
     console.log("Database connected");
