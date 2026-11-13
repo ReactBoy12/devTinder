@@ -10,12 +10,12 @@ app.post("/signUp", async (req, res) => {
     const requestBody = req.body;
     console.log("Request Body:", requestBody);
     const userData = new User(requestBody);
-
+    console.log(userData);
     await userData.save();
     res.status(201).send("User created successfully");
   } catch (error) {
     // console.error(error);
-    res.status(500).send("Internal Server Error", error);
+    res.status(500).send("Internal Server Error" + error);
   }
 });
 
